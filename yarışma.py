@@ -3,10 +3,23 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import serial
 import pyqtgraph as pg
 
+#ser = serial.Serial('COM3', baudrate=9600, timeout=1)
+
+
+def send_command(button_number):
+    # İlk byte buton numarasına eşit olmalıdır.
+    first_byte = button_number
+
+    # İkinci byte, ilk byte'ın bitlerinin tersi olmalıdır.
+    second_byte = ~button_number & 0xFF
+
+    # 2 byte'lık paketi gönder
+    #ser.write(bytes([first_byte, second_byte]))
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setGeometry(200, 200, 1000, 500)
+        self.setGeometry(30, 300, 400, 550)
         self.setWindowTitle("Real-Time Data Plotting")
         self.graphWidget = pg.PlotWidget()
         self.setCentralWidget(self.graphWidget)
@@ -15,6 +28,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('left', 'Values')
         self.graphWidget.setLabel('bottom', 'Time')
         self.graphWidget.setTitle('Real-Time Data Plotting')
+
+
 
         self.latitude = []
         self.longitude = []
@@ -227,9 +242,9 @@ class DataWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
-
     def init_ui(self):
         # Create plots
+
         self.latitude_plot = PlotWidget("Latitude")
         self.longitude_plot = PlotWidget("Longitude")
         self.speed_plot = PlotWidget("Speed")
@@ -246,7 +261,6 @@ class DataWindow(QtWidgets.QWidget):
 
         # Set layout
         self.setLayout(grid)
-
     def update_data(self, values):
         # Update latitude plot
         self.latitude_plot.plot(values[0])
@@ -263,6 +277,44 @@ class DataWindow(QtWidgets.QWidget):
         # Update temperature plot
         self.temperature_plot.plot(values[4])
 
+class SecondWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        # Eve Dön Butonu
+        btn1 = QtWidgets.QPushButton('Eve Dön', self)
+        btn1.move(30, 50)
+        btn1.resize(100, 50)
+        btn1.clicked.connect(lambda: self.sendCommand(1))
+
+        # Görüntü Al Butonu
+        btn2 = QtWidgets.QPushButton('Görüntü Al', self)
+        btn2.move(150, 50)
+        btn2.resize(100, 50)
+        btn2.clicked.connect(lambda: self.sendCommand(2))
+
+        # Hızlan Butonu
+        btn3 = QtWidgets.QPushButton('Hızlan', self)
+        btn3.move(270, 50)
+        btn3.resize(100, 50)
+        btn3.clicked.connect(lambda: self.sendCommand(3))
+
+        # Eve Dön butonu fonksiyonu
+        def eve_don(self):
+            send_command(0x01)  # 0x01 değeri "Eve Dön" butonunun numarasıdır.
+
+        # Görüntü Al butonu fonksiyonu
+        def goruntu_al(self):
+            send_command(0x02)  # 0x02 değeri "Görüntü Al" butonunun numarasıdır.
+
+        # Hızlan butonu fonksiyonu
+        def hizlan(self):
+            send_command(0x03)  # 0x03 değeri "Hızlan" butonunun numarasıdır.
+
+        self.setGeometry(30, 20, 400, 150)
+        self.setWindowTitle('Araç Kontrol Arayüzü')
 
 class PlotWidget(QtWidgets.QWidget):
     def __init__(self, title):
@@ -294,7 +346,10 @@ class PlotWidget(QtWidgets.QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
+    window2 = SecondWindow()
     serial_port = SerialPort()
     window.show()
+    window2.show()
     serial_port.show()
     sys.exit(app.exec())
+
