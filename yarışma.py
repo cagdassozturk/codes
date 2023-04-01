@@ -3,7 +3,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import serial
 import pyqtgraph as pg
 
-#ser = serial.Serial('COM3', baudrate=9600, timeout=1)
+ser = serial.Serial('COM3', baudrate=9600, timeout=1)
 
 
 def send_command(button_number):
@@ -14,7 +14,7 @@ def send_command(button_number):
     second_byte = ~button_number & 0xFF
 
     # 2 byte'lık paketi gönder
-    #ser.write(bytes([first_byte, second_byte]))
+    ser.write(bytes([first_byte, second_byte]))
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -352,4 +352,3 @@ if __name__ == "__main__":
     window2.show()
     serial_port.show()
     sys.exit(app.exec())
-
